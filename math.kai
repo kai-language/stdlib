@@ -6,3 +6,24 @@ e            :: 2.71828182845904523536
 
 epsilon      :: 1.19209290e-7
 
+#library "llvm"
+
+#foreign llvm {
+    sqrt    :: (x: f64) -> f64        #linkname "llvm.sqrt.f64"
+
+    sin     :: (x: f64) -> f64        #linkname "llvm.sin.f64"
+
+    cos     :: (x: f64) -> f64        #linkname "llvm.cos.f64"
+
+    pow     :: (x, power: f64) -> f64 #linkname "llvm.pow.f64"
+
+    fmuladd :: (a, b, c: f64) -> f64  #linkname "llvm.fmuladd.f64"
+}
+
+tan  :: fn(x: f64) -> f64 { return sin(x) / cos(x) }
+
+sign :: fn(x: f64) -> f64 {
+    if x >= 0.0 return +1
+    else return -1
+}
+
