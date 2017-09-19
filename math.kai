@@ -42,14 +42,14 @@ mag_4 :: fn(v: [vec 4]f32) -> f32 {
 }
 
 norm :: fn(v: [vec 3]f32) -> [vec 3]f32 {
-    mag := mag(v)
-    mv := [vec 3]f32 { mag, mag, mag }
+    m := mag(v)
+    mv := [vec 3]f32 { m, m, m }
     return v / mv
 }
 
 norm_4 :: fn(v: [vec 4]f32) -> [vec 4]f32 {
-    mag := mag_4(v)
-    mv := [vec 4]f32 { mag, mag, mag, mag }
+    m := mag_4(v)
+    mv := [vec 4]f32 { m, m, m, m }
     return v / mv
 }
 
@@ -229,3 +229,4 @@ perspective :: fn(fovy, aspect, near, far: f32) -> [4][4]f32 {
     m[3][2] = -2.0 * far * near / (far - near)
     return m
 }
+
