@@ -6,6 +6,9 @@ e            :: 2.71828182845904523536
 
 epsilon      :: 1.19209290e-7
 
+Vec3 :: [vec 3]f32
+Mat4 :: [4][4]f32
+
 #library "llvm"
 
 #foreign llvm {
@@ -23,7 +26,7 @@ sign :: fn(x: f32) -> f32 {
     else return -1
 }
 
-dot :: fn(a, b: [vec 3]f32) -> f32 {
+dot :: fn(a, b: Vec3) -> f32 {
     c := a * b
     return c.x + c.y + c.z
 }
@@ -33,7 +36,7 @@ dot_4 :: fn(a, b: [vec 4]f32) -> f32 {
     return c.x + c.y + c.z + c.w
 }
 
-mag :: fn(v: [vec 3]f32) -> f32 {
+mag :: fn(v: Vec3) -> f32 {
     return sqrt(dot(v, v))
 }
 
@@ -41,9 +44,9 @@ mag_4 :: fn(v: [vec 4]f32) -> f32 {
     return sqrt(dot_4(v, v))
 }
 
-norm :: fn(v: [vec 3]f32) -> [vec 3]f32 {
+norm :: fn(v: Vec3) -> Vec3 {
     m := mag(v)
-    mv := [vec 3]f32 { m, m, m }
+    mv := Vec3 { m, m, m }
     return v / mv
 }
 
@@ -53,13 +56,13 @@ norm_4 :: fn(v: [vec 4]f32) -> [vec 4]f32 {
     return v / mv
 }
 
-cross :: fn(x, y: [vec 3]f32) -> [vec 3]f32 {
+cross :: fn(x, y: Vec3) -> Vec3 {
     a := x.yzx * y.zxy
     b := x.zxy * y.yzx
     return a - b
 }
 
-identity_mat :: fn() -> [4][4]f32 {
+identity_mat :: fn() -> Mat4 {
     return [4][4]f32 {
         {1, 0, 0, 0},
         {0, 1, 0, 0},
@@ -68,7 +71,7 @@ identity_mat :: fn() -> [4][4]f32 {
     }
 }
 
-transpose :: fn(m: [4][4]f32) -> [4][4]f32 {
+transpose :: fn(m: Mat4) -> Mat4 {
     for j := 0; j < 4; j += 1 {
         for i := 0; i < 4; i += 1 {
             m[i][j], m[j][i] = m[j][i], m[i][j]
@@ -77,8 +80,8 @@ transpose :: fn(m: [4][4]f32) -> [4][4]f32 {
     return m
 } 
 
-mul :: fn(a,b: [4][4]f32) -> [4][4]f32 {
-    c: [4][4]f32
+mul :: fn(a,b: Mat4) -> Mat4 {
+    c: Mat4
     for j := 0; j < 4; j += 1 {
         for i := 0; i < 4; i += 1 {
             c[j][i] = a[0][i] * b[j][0] +
@@ -90,8 +93,8 @@ mul :: fn(a,b: [4][4]f32) -> [4][4]f32 {
     return c
 }
 
-inverse :: fn(m: [4][4]f32) -> [4][4]f32 {
-    o: [4][4]f32
+inverse :: fn(m: Mat4) -> Mat4 {
+    o: Mat4
 
     sf00 := m[2][2] * m[3][3] - m[3][2] * m[2][3]
     sf01 := m[2][1] * m[3][3] - m[3][1] * m[2][3]
@@ -155,7 +158,7 @@ inverse :: fn(m: [4][4]f32) -> [4][4]f32 {
     return o
 }
 
-translate_mat :: fn(v: [vec 3]f32) -> [4][4]f32 {
+translate_mat :: fn(v: Vec3) -> Mat4 {
     m := identity_mat()
     m[3][0] = v.x
     m[3][1] = v.y
@@ -164,13 +167,13 @@ translate_mat :: fn(v: [vec 3]f32) -> [4][4]f32 {
     return m
 }
 
-rotate_mat :: fn(v: [vec 3]f32, rads: f32) -> [4][4]f32 {
+rotate_mat :: fn(v: Vec3, rads: f32) -> Mat4 {
     c := cos(rads)
     s := sin(rads)
 
     a := norm(v)
     b := 1.0 - c
-    vc := [vec 3]f32 { b, b, b }
+    vc := Vec3 { b, b, b }
     t := a * vc
 
     rot := identity_mat()
@@ -193,14 +196,14 @@ rotate_mat :: fn(v: [vec 3]f32, rads: f32) -> [4][4]f32 {
     return rot
 }
 
-scale :: fn(m: [4][4]f32, s: f32) -> [4][4]f32 {
+scale :: fn(m: Mat4, s: f32) -> Mat4 {
     m[0][0] *= s
     m[1][1] *= s
     m[2][2] *= s
     return m
 }
 
-look_at :: fn(eye, centre, up: [vec 3]f32) -> [4][4]f32 {
+look_at :: fn(eye, centre, up: Vec3) -> Mat4 {
     f := norm(centre - eye)
     s := norm(cross(f, up))
     u := cross(s, f)
@@ -213,8 +216,8 @@ look_at :: fn(eye, centre, up: [vec 3]f32) -> [4][4]f32 {
     }
 }
 
-perspective :: fn(fovy, aspect, near, far: f32) -> [4][4]f32 {
-    m := [4][4]f32 {
+perspective :: fn(fovy, aspect, near, far: f32) -> Mat4 {
+    m : Mat4 = [4][4]f32 {
         {0, 0, 0, 0},
         {0, 0, 0, 0},
         {0, 0, 0, 0},
@@ -229,4 +232,3 @@ perspective :: fn(fovy, aspect, near, far: f32) -> [4][4]f32 {
     m[3][2] = -2.0 * far * near / (far - near)
     return m
 }
-
