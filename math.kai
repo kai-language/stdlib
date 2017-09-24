@@ -64,7 +64,7 @@ cross :: fn(x, y: Vec3) -> Vec3 {
 }
 
 identity_mat :: fn() -> Mat4 {
-    return [4][4]f32 {
+    return Mat4 {
         {1, 0, 0, 0},
         {0, 1, 0, 0},
         {0, 0, 1, 0},
@@ -209,7 +209,7 @@ look_at :: fn(eye, centre, up: Vec3) -> Mat4 {
     s := norm(cross(f, up))
     u := cross(s, f)
 
-    return [4][4]f32 {
+    return Mat4 {
         { s.x, u.x, -f.x, 0 },
         { s.y, u.y, -f.y, 0 },
         { s.z, u.z, -f.z, 0 },
@@ -218,7 +218,7 @@ look_at :: fn(eye, centre, up: Vec3) -> Mat4 {
 }
 
 perspective :: fn(fovy, aspect, near, far: f32) -> Mat4 {
-    m : Mat4 = [4][4]f32 {
+    m := Mat4 {
         {0, 0, 0, 0},
         {0, 0, 0, 0},
         {0, 0, 0, 0},
