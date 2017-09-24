@@ -7,6 +7,7 @@ e            :: 2.71828182845904523536
 epsilon      :: 1.19209290e-7
 
 Vec3 :: [vec 3]f32
+Vec4 :: [vec 4]f32
 Mat4 :: [4][4]f32
 
 #library "llvm"
@@ -31,7 +32,7 @@ dot :: fn(a, b: Vec3) -> f32 {
     return c.x + c.y + c.z
 }
 
-dot_4 :: fn(a, b: [vec 4]f32) -> f32 {
+dot_4 :: fn(a, b: Vec4) -> f32 {
     c := a * b
     return c.x + c.y + c.z + c.w
 }
@@ -40,7 +41,7 @@ mag :: fn(v: Vec3) -> f32 {
     return sqrt(dot(v, v))
 }
 
-mag_4 :: fn(v: [vec 4]f32) -> f32 {
+mag_4 :: fn(v: Vec4) -> f32 {
     return sqrt(dot_4(v, v))
 }
 
@@ -50,9 +51,9 @@ norm :: fn(v: Vec3) -> Vec3 {
     return v / mv
 }
 
-norm_4 :: fn(v: [vec 4]f32) -> [vec 4]f32 {
+norm_4 :: fn(v: Vec4) -> Vec4 {
     m := mag_4(v)
-    mv := [vec 4]f32 { m, m, m, m }
+    mv := Vec4 { m, m, m, m }
     return v / mv
 }
 
