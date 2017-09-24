@@ -1,0 +1,24 @@
+
+#library "llvm"
+#library "libc"
+
+#import "types.kai" _
+
+// TODO: @overloading
+#foreign llvm #callconv "c" {
+
+//  memcpy  :: (dst, src: rawptr, len: u32, align: i32, isVolatile: bool) -> void          #linkname "llvm.memcpy.p0i8.p0i8.i32"
+    memcpy  :: (dst, src: rawptr, len: u64, align: i32, isVolatile: bool) -> void          #linkname "llvm.memcpy.p0i8.p0i8.i64"
+
+//  memmove :: (dst, src: rawptr, len: u32, align: i32, isVolatile: bool) -> void          #linkname "llvm.memmove.p0i8.p0i8.i32"
+    memmove :: (dst, src: rawptr, len: u64, align: i32, isVolatile: bool) -> void          #linkname "llvm.memmove.p0i8.p0i8.i64"
+
+//  memset  :: (dst: rawptr, val: u8, len: u32, align: u32, isVolatile: bool) -> void      #linkname "llvm.memset.p0i8.i32"
+    memset  :: (dst: rawptr, val: u8, len: u64, align: u32, isVolatile: bool) -> void      #linkname "llvm.memset.p0i8.i64"
+}
+
+#foreign libc #callconv "c" {
+    malloc  :: (size: size_t) -> rawptr
+    free    :: (ptr: rawptr) -> void
+    realloc :: (ptr: rawptr, size: size_t) -> rawptr
+}

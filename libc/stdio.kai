@@ -1,0 +1,68 @@
+
+#import "types.kai" _
+
+#library "libc"
+
+File :: rawptr
+
+// TODO: Name the arguments
+#foreign libc #callconv "c" {
+    clearerr :: (File) -> void
+    ctermid :: (*u8) -> *u8
+    fclose :: (File) -> i32
+    fdopen :: (i32, *u8) -> File
+    feof :: (File) -> i32
+    ferror :: (File) -> i32
+    fflush :: (File) -> i32
+    fgetc :: (File) -> i32
+    fgetpos :: (File, *i64) -> i32
+    fgets :: (*u8, i32, File) -> *u8
+    fileno :: (File) -> i32
+    flockfile :: (File) -> void
+    fopen :: (*u8, *u8) -> File
+    fprintf :: (stream: File, format: *u8, args: #cvargs ..any) -> i32
+    fputc :: (i32, File) -> i32
+    fputs :: (*u8, File) -> i32
+    // TODO: Parser error
+    //fread :: (void *, size_t, size_t, File) -> size_t
+    freopen :: (*u8, *u8, File) -> File
+    fscanf :: (stream: File, format: *u8, args: #cvargs ..any) -> i32
+    fseek :: (File, i64, i32) -> i32
+    fseeko :: (File, off_t, i32) -> i32
+    fsetpos :: (File, *i64) -> i32
+    ftell :: (File) -> i64
+    ftello :: (File) -> off_t
+    ftrylockfile :: (File) -> i32
+    funlockfile :: (File) -> void
+    fwrite :: (rawptr, size_t, size_t, File) -> size_t
+    getc :: (File) -> i32
+    getchar :: () -> i32
+    getc_unlocked :: (File) -> i32
+    getchar_unlocked :: () -> i32
+    gets :: (*u8) -> *u8
+    getw :: (File) -> i32
+    pclose :: (File) -> i32
+    perror :: (*u8) -> void
+    popen :: (*u8, *u8) -> File
+    printf :: (format: *u8, args: #cvargs ..any) -> i32
+    putc :: (i32, File) -> i32
+    putchar :: (i32) -> i32
+    putc_unlocked :: (i32, File) -> i32
+    putchar_unlocked :: (i32) -> i32
+    puts :: (*u8) -> i32
+    putw :: (i32, File) -> i32
+    remove :: (*u8) -> i32
+    rename :: (*u8, *u8) -> i32
+    rewind :: (File) -> void
+    scanf :: (format: *u8, args: #cvargs ..any) -> i32
+    setbuf :: (File, *u8) -> void
+    setvbuf :: (File, *u8, i32, size_t) -> i32
+    snprintf :: (*u8, size_t, *u8, #cvargs ..any) -> i32
+    sprintf :: (buffer: *u8, format: *u8, args: #cvargs ..any) -> i32
+    // NOTE: Linux does not match macOS here
+    sscanf :: (buffer: *u8, format: *u8, args: #cvargs ..any) -> i32
+    tempnam :: (*u8, *u8) -> *u8
+    tmpfile :: () -> File
+    tmpnam :: (*u8) -> *u8
+    ungetc :: (i32, File) -> i32
+}

@@ -1,0 +1,38 @@
+
+#library "libc"
+
+#import "os.kai"
+
+#foreign libc #callconv "c" {
+    memcpy  :: (dest: rawptr, src: rawptr, count: i64) -> rawptr
+}
+
+append :: fn (str: string, val: string) -> string {
+    newLen := str.len + val.len
+
+    // 0 indicates that the string was stack allocated
+    if str.cap == 0 {
+        buff := os.malloc(newLen)
+        dataCopy := memcpy(buff, str.raw, str.len)
+        str.raw = dataCopy
+        str.cap = newLen
+    }
+
+    if newLen > str.cap {
+        newCap := newLen * 2
+        buff := os.realloc(str.raw, newCap)
+        str.raw = buff
+        str.cap = newCap
+    }
+
+    memcpy(&str.raw[str.len], val.raw, val.len)
+    str.len = newLen
+
+    return str
+}
+
+nulTerminate :: fn(s: string) -> string {
+    s = append(s, "\x00")
+    s.len -= 1
+    return s
+}

@@ -1,0 +1,24 @@
+
+cint   :: i32
+cuint  :: u32
+clong  :: i64
+culong :: u64
+
+// http://elixir.free-electrons.com/linux/v4.13.2/source/include/linux/types.h#L31
+uid_t :: cuint
+gid_t :: cuint
+
+// http://elixir.free-electrons.com/linux/v4.13.2/source/include/linux/types.h#L20
+off_t  :: clong
+pid_t  :: cint
+mode_t :: cuint
+
+// http://elixir.free-electrons.com/linux/v4.13.2/source/include/uapi/asm-generic/posix_types.h#L67
+ssize_t :: clong
+size_t  :: culong
+
+// http://elixir.free-electrons.com/linux/v4.13.2/source/include/linux/types.h#L36
+intptr_t  :: clong
+uintptr_t :: clong
+
+useconds_t :: clong

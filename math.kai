@@ -1,4 +1,6 @@
 
+#import "intrinsics/math.kai" _
+
 tau          :: 6.28318530717958647692528676655900576
 pi           :: 3.14159265358979323846264338327950288
 
@@ -10,22 +12,7 @@ Vec3 :: [vec 3]f32
 Vec4 :: [vec 4]f32
 Mat4 :: [4][4]f32
 
-#library "llvm"
-
-#foreign llvm {
-    sqrt    :: (x: f32) -> f32        #linkname "llvm.sqrt.f32"
-    sin     :: (x: f32) -> f32        #linkname "llvm.sin.f32"
-    cos     :: (x: f32) -> f32        #linkname "llvm.cos.f32"
-    pow     :: (x, power: f32) -> f32 #linkname "llvm.pow.f32"
-    fmuladd :: (a, b, c: f64) -> f64  #linkname "llvm.fmuladd.f64"
-}
-
 tan  :: fn(x: f32) -> f32 { return sin(x) / cos(x) }
-
-sign :: fn(x: f32) -> f32 {
-    if x >= 0.0 return +1
-    else return -1
-}
 
 dot :: fn(a, b: Vec3) -> f32 {
     c := a * b
@@ -79,7 +66,7 @@ transpose :: fn(m: Mat4) -> Mat4 {
         }
     }
     return m
-} 
+}
 
 mul :: fn(a,b: Mat4) -> Mat4 {
     c: Mat4

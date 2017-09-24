@@ -1,0 +1,200 @@
+
+#import "platform/macos.kai"
+#import "libc/mem.kai"
+
+#foreign libc #callconv "c" {
+    memcpy  :: (dest: rawptr, src: rawptr, count: i64) -> rawptr
+}
+
+nulTerminate :: fn(s: string) -> string {
+    if s.cap == 0 {
+        return s // strings in the data section are always nul terminated
+    }
+
+    if s.cap >= s.len + 1 {
+        s.raw[s.len] = 0
+        return s
+    }
+
+    s.raw = realloc(s.raw, cast(u64) s.cap + 1)
+    s.cap = s.cap + 1
+    s.raw[s.len] = 0
+    return s
+}
+
+Handle    :: i32
+Errno     :: i32
+
+Stat      :: macos.Stat
+FileTime  :: macos.FileTime
+
+O_RDONLY   :: 0x00000
+O_WRONLY   :: 0x00001
+O_RDWR     :: 0x00002
+O_CREAT    :: 0x00040
+O_EXCL     :: 0x00080
+O_NOCTTY   :: 0x00100
+O_TRUNC    :: 0x00200
+O_NONBLOCK :: 0x00800
+O_APPEND   :: 0x00400
+O_SYNC     :: 0x01000
+O_ASYNC    :: 0x02000
+O_CLOEXEC  :: 0x80000
+
+
+SEEK_SET   :: 0
+SEEK_CUR   :: 1
+SEEK_END   :: 2
+SEEK_DATA  :: 3
+SEEK_HOLE  :: 4
+SEEK_MAX   :: SEEK_HOLE
+
+// NOTE(zangent): These are OS specific!
+// Do not mix these up!
+RTLD_LAZY     :: 0x1
+RTLD_NOW      :: 0x2
+RTLD_LOCAL    :: 0x4
+RTLD_GLOBAL   :: 0x8
+RTLD_NODELETE :: 0x80
+RTLD_NOLOAD   :: 0x10
+RTLD_FIRST    :: 0x100
+
+
+args: []string
+
+// File type
+S_IFMT   :: 0170000 // Type of file mask
+S_IFIFO  :: 0010000 // Named pipe (fifo)
+S_IFCHR  :: 0020000 // Character special
+S_IFDIR  :: 0040000 // Directory
+S_IFBLK  :: 0060000 // Block special
+S_IFREG  :: 0100000 // Regular
+S_IFLNK  :: 0120000 // Symbolic link
+S_IFSOCK :: 0140000 // Socket
+
+// File mode
+// Read, write, execute/search by owner
+S_IRWXU :: 0000700 // RWX mask for owner
+S_IRUSR :: 0000400 // R for owner
+S_IWUSR :: 0000200 // W for owner
+S_IXUSR :: 0000100 // X for owner
+
+// Read, write, execute/search by group
+S_IRWXG :: 0000070 // RWX mask for group
+S_IRGRP :: 0000040 // R for group
+S_IWGRP :: 0000020 // W for group
+S_IXGRP :: 0000010 // X for group
+
+// Read, write, execute/search by others
+S_IRWXO :: 0000007 // RWX mask for other
+S_IROTH :: 0000004 // R for other
+S_IWOTH :: 0000002 // W for other
+S_IXOTH :: 0000001 // X for other
+
+S_ISUID :: 0004000 // Set user id on execution
+S_ISGID :: 0002000 // Set group id on execution
+S_ISVTX :: 0001000 // Directory restrcted delete
+
+S_ISLNK  :: fn(m: u32) -> bool { return (m & S_IFMT) == S_IFLNK }
+S_ISREG  :: fn(m: u32) -> bool { return (m & S_IFMT) == S_IFREG }
+S_ISDIR  :: fn(m: u32) -> bool { return (m & S_IFMT) == S_IFDIR }
+S_ISCHR  :: fn(m: u32) -> bool { return (m & S_IFMT) == S_IFCHR }
+S_ISBLK  :: fn(m: u32) -> bool { return (m & S_IFMT) == S_IFBLK }
+S_ISFIFO :: fn(m: u32) -> bool { return (m & S_IFMT) == S_IFIFO }
+S_ISSOCK :: fn(m: u32) -> bool { return (m & S_IFMT) == S_IFSOCK }
+
+R_OK :: 4 // Test for read permission
+W_OK :: 2 // Test for write permission
+X_OK :: 1 // Test for execute permission
+F_OK :: 0 // Test for file existance
+
+#linkname "kai.open"
+open :: fn(path: string, mode: i32) -> (Handle, Errno) {
+
+    path = nulTerminate(path)
+    handle := macos.open(path.raw, autocast mode)
+    if handle == -1  {
+        return 0, 1
+    }
+    return handle, 0
+}
+
+// TODO: Errno?
+close :: macos.close
+
+#linkname "kai.write"
+write :: fn(fd: Handle, data: []u8) -> (i64, Errno) {
+    //assert(fd != -1)
+
+    bytesWritten := macos.write(fd, &data[0], cast(macos.size_t) data.len)
+    if bytesWritten == -1 {
+        return 0, 1
+    }
+    return bytesWritten, 0
+}
+
+#linkname "kai.read"
+read :: fn(fd: Handle, data: []u8) -> (i64, Errno) {
+    //assert(fd != -1)
+
+    bytesRead := macos.read(fd, &data[0], cast(macos.size_t) data.cap)
+    if bytesRead == -1 {
+        return 0, 1
+    }
+    return bytesRead, 0
+}
+
+#linkname "kai.seek"
+seek :: fn(fd: Handle, offset: i64, whence: i32) -> (i64, Errno) {
+    //assert(fd != -1)
+
+    finalOffset := macos.lseek(fd, offset, whence)
+    if finalOffset == -1 {
+        return 0, 1
+    }
+    return finalOffset, 0
+}
+
+fileSize :: fn(fd: Handle) -> (i64, Errno) {
+    prev, _   := seek(fd, 0, SEEK_CUR)
+    size, err := seek(fd, 0, SEEK_END)
+    seek(fd, prev, SEEK_SET)
+    return size, err
+}
+
+
+
+// TODO: How to initialize these correctly?
+stdin:  Handle = 0
+stdout: Handle = 1
+stderr: Handle = 2
+
+#linkname "kai.stat"
+stat :: fn(path: string) -> (Stat, bool) {
+    s: Stat
+    path = nulTerminate(path)
+    ret := macos.stat(path.raw, &s)
+    return s, ret == 0
+}
+
+#linkname "kai.access"
+access :: fn(path: string, mask: i32) -> bool {
+    path = nulTerminate(path)
+    return macos.access(path.raw, mask) == 0
+}
+
+
+//getenv :: fn(name: string) -> (string, bool) {
+//    name = strings.nulTerminate(name)
+//	cstr: *u8 = macos.getenv(name.raw)
+//	if(cstr == nil) {
+//		return "", false
+//	}
+//	return strings.to_odin_string(cstr), true
+//}
+
+malloc  :: mem.malloc
+realloc :: mem.realloc
+free    :: mem.free
+
+exit :: macos.exit

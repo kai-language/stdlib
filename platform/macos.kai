@@ -1,0 +1,146 @@
+
+#library "libc"
+
+cint   :: i32
+cuint  :: u32
+clong  :: i64
+culong :: u64
+
+// http://elixir.free-electrons.com/linux/v4.13.2/source/include/linux/types.h#L31
+uid_t :: cuint
+gid_t :: cuint
+
+// http://elixir.free-electrons.com/linux/v4.13.2/source/include/linux/types.h#L20
+off_t  :: clong
+pid_t  :: cint
+mode_t :: cuint
+
+// http://elixir.free-electrons.com/linux/v4.13.2/source/include/uapi/asm-generic/posix_types.h#L67
+ssize_t :: clong
+size_t  :: culong
+
+// http://elixir.free-electrons.com/linux/v4.13.2/source/include/linux/types.h#L36
+intptr_t  :: clong
+uintptr_t :: clong
+
+useconds_t :: clong
+
+FileTime :: u64
+
+Stat :: struct {
+    device_id:     i32, // ID of device containing file
+    mode:          u16, // Mode of the file
+    nlink:         u16, // Number of hard links
+    serial:        u64, // File serial number
+    uid:           u32, // User ID of the file's owner
+    gid:           u32, // Group ID of the file's group
+    rdev:          i32, // Device ID, if device
+
+    last_access:   FileTime, // Time of last access
+    modified:      FileTime, // Time of last modification
+    status_change: FileTime, // Time of last status change
+    created:       FileTime, // Time of creation
+
+    size:          i64,  // Size of the file, in bytes
+    blocks:        i64,  // Number of blocks allocated for the file
+    block_size:    i32,  // Optimal blocksize for I/O
+    flags:         u32,  // User-defined flags for the file
+    gen_num:       u32,  // File generation number ...?
+    _spare:        i32,  // RESERVED
+    _reserve1,
+    _reserve2:     i64  // RESERVED
+}
+
+// unistd.h
+#foreign libc #callconv "c" {
+    access :: (*u8, cint) -> cint
+    alarm :: (cuint) -> cuint
+    brk :: (rawptr) -> cint
+    chdir :: (*u8) -> cint
+    chown :: (*u8, uid_t, gid_t) -> cint
+    close :: (cint) -> cint
+    confstr :: (cint, *u8, size_t) -> size_t
+    crypt :: (*u8, *u8) -> *u8
+    ctermid :: (*u8) -> *u8
+    dup :: (cint) -> cint
+    dup2 :: (cint, cint) -> cint
+    encrypt :: ([64]u8, cint) -> void
+    execl :: (*u8, *u8, ..any) -> cint
+    execle :: (*u8, *u8, ..any) -> cint
+    execlp :: (*u8, *u8, ..any) -> cint
+    execv :: (*u8, **u8) -> cint
+    execve :: (*u8, **u8, **u8) -> cint
+    execvp :: (*u8, **u8) -> cint
+    _exit :: (cint) -> void
+    fchown :: (cint, uid_t, gid_t) -> cint
+    fchdir :: (cint) -> cint
+    fdatasync :: (cint) -> cint
+    fork :: () -> pid_t
+    fpathconf :: (cint, cint) -> clong
+    fsync :: (cint) -> cint
+    ftruncate :: (cint, off_t) -> cint
+    getcwd :: (*u8, size_t) -> *u8
+    getegid :: () -> gid_t
+    geteuid :: () -> uid_t
+    getgid :: () -> gid_t
+    getgroups :: (cint, *gid_t) -> cint
+    gethostid :: () -> clong
+    getlogin :: () -> *u8
+    getlogin_r :: (*u8, size_t) -> cint
+    getopt :: (cint, **u8, *u8) -> cint
+    getpgid :: (pid_t) -> pid_t
+    getpgrp :: () -> pid_t
+    getpid :: () -> pid_t
+    getppid :: () -> pid_t
+    getsid :: (pid_t) -> pid_t
+    getuid :: () -> uid_t
+    getwd :: (*u8) -> *u8
+    isatty :: (cint) -> cint
+    lchown :: (*u8, uid_t, gid_t) -> cint
+    link :: (*u8, *u8) -> cint
+    lockf :: (cint, cint, off_t) -> cint
+    lseek :: (cint, off_t, cint) -> off_t
+    nice :: (cint) -> cint
+    pathconf :: (*u8, cint) -> clong
+    pause :: () -> cint
+    pipe :: ([2]cint) -> cint
+    pread :: (cint, rawptr, size_t, off_t) -> ssize_t
+    // FIXME: Broken
+    //pthread_atfork :: (*() -> void, *() -> void, *() -> void) -> cint
+    pwrite :: (cint, rawptr, size_t, off_t) -> ssize_t
+    read :: (cint, rawptr, size_t) -> ssize_t
+    rmdir :: (*u8) -> cint
+    sbrk :: (intptr_t) -> rawptr
+    setgid :: (gid_t) -> cint
+    setpgid :: (pid_t, pid_t) -> cint
+    setpgrp :: () -> pid_t
+    setregid :: (gid_t, gid_t) -> cint
+    setreuid :: (uid_t, uid_t) -> cint
+    setsid :: () -> pid_t
+    setuid :: (uid_t) -> cint
+    sleep :: (cuint) -> cuint
+    swab :: (*u8, rawptr, ssize_t) -> void
+    symlink :: (*u8, *u8) -> cint
+    sync :: () -> void
+    sysconf :: (cint) -> clong
+    tcgetpgrp :: (cint) -> pid_t
+    tcsetpgrp :: (cint, pid_t) -> cint
+    truncate :: (*u8, off_t) -> cint
+    ttyname :: (cint) -> *u8
+    ttyname_r :: (cint, *u8, size_t) -> cint
+    ualarm :: (useconds_t, useconds_t) -> useconds_t
+    unlink :: (*u8) -> cint
+    usleep :: (useconds_t) -> cint
+    vfork :: () -> pid_t
+    write :: (cint, rawptr, size_t) -> ssize_t
+
+    creat :: (*u8, mode_t) -> cint
+
+    // FIXME: Parser bug
+    //fcntl :: (cint, cint, ..any) -> cint
+    open  :: (*u8, cint, ..any) -> cint
+    getenv  :: (*u8) -> *u8
+    stat    :: (path: *u8, stat: *Stat) -> cint
+
+    exit    :: (status: cint) -> void
+}

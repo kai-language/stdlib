@@ -1,0 +1,30 @@
+
+#import "os.kai"
+#import "libc/mem.kai"
+#import "math.kai"
+
+#library "libc"
+
+#foreign libc
+printf :: (fmt: *u8, args: #cvargs ..any) -> i32
+
+panic :: fn(msg: string) -> void {
+    printf(msg.raw)
+    os.exit(1)
+}
+
+main :: fn() -> void {
+    data := []u8{}
+    data.raw = mem.malloc(1024)
+    data.cap = 1024
+
+    fd, err := os.open("/Users/vdka/Source/vdka/stdlib/test.kai", os.O_RDONLY)
+    if err != 0 panic("Failed to open file")
+
+    bytes, err2 := os.read(fd, data)
+    if err2 != 0 panic("Failed to read file")
+
+    data.raw[bytes] = 0
+
+    printf("%s\n".raw, data.raw)
+}
